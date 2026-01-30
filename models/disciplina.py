@@ -58,3 +58,16 @@ class Disciplina:
                 print("Erro ao buscar disciplina:", e)
                 return None
         return None
+    
+    @staticmethod
+    def getAll():
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM disciplina")
+            resultado = cursor.fetchall()
+            conn.close()
+            return resultado
+        except Exception as e:
+                print("Erro ao buscar disciplina:", e)
+                return None

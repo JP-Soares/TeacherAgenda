@@ -58,3 +58,16 @@ class Turno:
                 print("Erro ao buscar turno:", e)
                 return None
         return None
+    
+    @staticmethod
+    def getAll():
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM turno")
+            resultado = cursor.fetchall()
+            conn.close()
+            return resultado
+        except Exception as e:
+                print("Erro ao buscar turno:", e)
+                return None

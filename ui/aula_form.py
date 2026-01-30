@@ -1,34 +1,130 @@
 import tkinter as tk
+from tkinter import ttk, messagebox
+
+from services.aula_service import AulaService
+from models.professor import Professor
+from models.disciplina import Disciplina
+from models.curso import Curso
+from models.turma import Turma
+from models.turno import Turno
+from models.agenda import Agenda
+
 
 class AulaForm:
     def __init__(self, parent, day, month, year):
         self.window = tk.Toplevel(parent)
         self.window.title("Cadastro de Aula")
-        self.window.geometry("400x420")
-        self.window.configure(bg="#ffffff")
+        self.window.geometry("480x520")
+        self.window.configure(bg="#f4f6f8")
+
+        self.day = day
+        self.month = month
+        self.year = year
+
+        self.build_form()
+
+    # ================= FORM =================
+    def build_form(self):
+        frame = tk.Frame(self.window, bg="#ffffff", padx=20, pady=20)
+        frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         tk.Label(
-            self.window,
-            text=f"Aula - {day}/{month}/{year}",
-            font=("Segoe UI", 14, "bold"),
+            frame,
+            text="Agendar Aula",
+            font=("Segoe UI", 16, "bold"),
             bg="#ffffff"
-        ).pack(pady=15)
+        ).pack(pady=(0, 20))
 
-        self.create_field("Professor")
-        self.create_field("Disciplina")
-        self.create_field("Turma")
-        self.create_field("Sala")
-        self.create_field("Turno")
+        # ===== Professor =====
+        self.professores = Professor.getAll()
+        self.prof_var = tk.StringVar()
+        self.create_combo(frame, "Professor", self.prof_var,
+                          self.professores)
 
+        # ===== Disciplina =====
+        self.disciplinas = Disciplina.getAll()
+        self.disc_var = tk.StringVar()
+        self.create_combo(frame, "Disciplina", self.disc_var,
+                          self.disciplinas)
+
+        # ===== Curso =====
+        self.cursos = Curso.getAll()
+        self.curso_var = tk.StringVar()
+        self.create_combo(frame, "Curso", self.curso_var,
+                          self.cursos)
+
+        # ===== Turma =====
+        self.turmas = Turma.getAll()
+        self.turma_var = tk.StringVar()
+        self.create_combo(frame, "Turma", self.turma_var,
+                          self.turmas)
+
+        # ===== Turno =====
+        self.turnos = Turno.getAll()
+        self.turno_var = tk.StringVar()
+        self.create_combo(frame, "Turno", self.turno_var,
+                          self.turnos)
+
+        # ===== Botão =====
         tk.Button(
-            self.window,
+            frame,
             text="Salvar",
-            bg="#2e7d32",
+            bg="#1976d2",
             fg="white",
-            font=("Segoe UI", 10, "bold"),
-            relief="flat"
-        ).pack(pady=20)
+            font=("Segoe UI", 11, "bold"),
+            relief="flat",
+            command=self.salvar
+        ).pack(pady=25, ipadx=10, ipady=6)
 
-    def create_field(self, label):
-        tk.Label(self.window, text=label, bg="#ffffff").pack(anchor="w", padx=30)
-        tk.Entry(self.window).pack(fill="x", padx=30, pady=5)
+    # ================= COMPONENT =================
+    def create_combo(self, parent, label, var, data):
+        tk.Label(parent, text=label, bg="#ffffff").pack(anchor="w")
+
+        valores = [item[1] for item in data]
+
+        combo = ttk.Combobox(
+            parent,
+            textvariable=var,
+            values=valores,
+            state="readonly"
+        )
+        combo.pack(fill="x", pady=5)
+
+        if valores:
+            combo.current(0)
+
+    # ================= SAVE =================
+    def salvar(self):
+        try:
+            id_professor = self.get_id(self.prof_var.get(), self.professores)
+            id_disciplina = self.get_id(self.disc_var.get(), self.disciplinas)
+            id_curso = self.get_id(self.curso_var.get(), self.cursos)
+            id_turma = self.get_id(self.turma_var.get(), self.turmas)
+            id_turno = self.get_id(self.turno_var.get(), self.turnos)
+
+            # 👉 busca ou cria agenda pelo dia
+            id_agenda = Agenda.getByDia(self.day, self.month, self.year)
+
+            sucesso, msg = AulaService.agendar_aula(
+                id_professor,
+                id_disciplina,
+                id_curso,
+                id_agenda,
+                id_turno,
+                id_turma
+            )
+
+            if sucesso:
+                messagebox.showinfo("Sucesso", msg)
+                self.window.destroy()
+            else:
+                messagebox.showwarning("Atenção", msg)
+
+        except Exception as e:
+            messagebox.showerror("Erro", str(e))
+
+    def get_id(self, nome, lista):
+        for item in lista:
+            if item[1] == nome:
+                return item[0]
+        return None

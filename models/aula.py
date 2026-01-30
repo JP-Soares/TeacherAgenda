@@ -77,3 +77,51 @@ class Aula:
         result = cursor.fetchall()
         conn.close()
         return result
+    
+    @staticmethod
+    def getAll():
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM aula")
+            resultado = cursor.fetchall()
+            conn.close()
+            return resultado
+        except Exception as e:
+                print("Erro ao buscar aula:", e)
+                return None
+        
+    @staticmethod
+    def getByData(dia, mes, ano):
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            data = f"{ano:04d}-{mes:02d}-{dia:02d}"
+
+            cursor.execute("""
+                SELECT
+                    a.id,
+                    d.nome AS disciplina,
+                    t.nome AS turma,
+                    tu.nome AS turno,
+                    p.nome AS professor
+                FROM aula a
+                JOIN agenda ag ON ag.id = a.id_agenda
+                JOIN disciplina d ON d.id = a.id_disciplina
+                JOIN turma t ON t.id = a.id_turma
+                JOIN turno tu ON tu.id = a.id_turno
+                JOIN professor p ON p.id = a.id_professor
+                WHERE ag.data = ?
+                ORDER BY tu.nome
+            """, (data,))
+
+            resultado = cursor.fetchall()
+            conn.close()
+            return resultado
+
+        except Exception as e:
+            print("Erro ao buscar aulas:", e)
+            return []
+
+

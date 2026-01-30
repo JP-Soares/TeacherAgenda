@@ -59,3 +59,42 @@ class Agenda:
                 print("Erro ao buscar agenda:", e)
                 return None
         return None
+    
+    @staticmethod
+    def getAll():
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM agenda")
+            resultado = cursor.fetchall()
+            conn.close()
+            return resultado
+        except Exception as e:
+                print("Erro ao buscar agenda:", e)
+                return None
+        
+    @staticmethod
+    def getByDia(dia, mes, ano):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id FROM agenda
+            WHERE dia = ? AND mes = ? AND ano = ?
+        """, (dia, mes, ano))
+
+        agenda = cursor.fetchone()
+
+        # Se não existir, cria
+        if not agenda:
+            cursor.execute("""
+                INSERT INTO agenda (dia, mes, ano)
+                VALUES (?, ?, ?)
+            """, (dia, mes, ano))
+            conn.commit()
+            agenda_id = cursor.lastrowid
+        else:
+            agenda_id = agenda[0]
+
+        conn.close()
+        return agenda_id

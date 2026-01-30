@@ -2,6 +2,7 @@ import tkinter as tk
 import calendar
 from datetime import datetime
 from ui.aula_form import AulaForm
+from models.aula import Aula
 
 
 class AgendaView:
@@ -73,6 +74,7 @@ class AgendaView:
         self.canvas.configure(yscrollcommand=scrollbar.set)
 
         self.calendar_frame = tk.Frame(self.canvas, bg="#f4f6f8")
+        self.calendar_frame.pack_propagate(False)
 
         self.calendar_window = self.canvas.create_window(
             (0, 0),
@@ -117,7 +119,11 @@ class AgendaView:
                 self.create_day_card(row, col, day)
 
         for i in range(7):
-            self.calendar_frame.columnconfigure(i, weight=1)
+            self.calendar_frame.columnconfigure(i, weight=1, uniform="cal")
+
+        total_rows = len(calendar.monthcalendar(self.year, self.month)) + 1
+        for i in range(total_rows):
+            self.calendar_frame.rowconfigure(i, weight=1, uniform="row")
 
     # ================= DAY CARD =================
     def create_day_card(self, row, col, day):
@@ -125,32 +131,55 @@ class AgendaView:
             self.calendar_frame,
             bg="#ffffff",
             bd=1,
-            relief="solid",
-            height=120
+            relief="solid"
         )
         card.grid(row=row, column=col, padx=6, pady=6, sticky="nsew")
+        card.grid_propagate(False)
+        card.configure(width=140, height=140)
 
         if day == 0:
             return
 
+        # 🔹 Número do dia
         tk.Label(
             card,
             text=str(day),
             font=("Segoe UI", 11, "bold"),
             bg="#ffffff"
-        ).pack(anchor="nw", padx=6, pady=4)
+        ).pack(anchor="nw", padx=6, pady=2)
 
-        # 🔹 Mock de aula (substituir depois pelo banco)
-        if day % 2 == 0:
+        # 🔹 Busca aulas do banco
+        aulas = Aula.getByData(day, self.month, self.year)
+
+        # 🔹 Agrupa por turno
+        aulas_por_turno = {}
+        for _, disciplina, turma, turno, professor in aulas:
+            aulas_por_turno.setdefault(turno, []).append(
+                (disciplina, professor)
+            )
+
+        # 🔹 Renderiza turnos
+        for turno, aulas_turno in aulas_por_turno.items():
             tk.Label(
                 card,
-                text="Matemática\nTurma A\nSala 2",
-                font=("Segoe UI", 9),
-                fg="#1565c0",
-                bg="#ffffff",
-                justify="left"
-            ).pack(pady=4)
+                text=turno,
+                font=("Segoe UI", 9, "bold"),
+                fg="#333333",
+                bg="#ffffff"
+            ).pack(anchor="w", padx=6)
 
+            for disciplina, professor in aulas_turno:
+                tk.Label(
+                    card,
+                    text=f"• {disciplina} ({professor})",
+                    font=("Segoe UI", 8),
+                    fg="#1565c0",
+                    bg="#ffffff",
+                    wraplength=130,
+                    justify="left"
+                ).pack(anchor="w", padx=10)
+
+        # 🔹 Botão editar
         tk.Button(
             card,
             text="Editar",
@@ -159,11 +188,16 @@ class AgendaView:
             fg="white",
             relief="flat",
             command=lambda d=day: self.open_aula_form(d)
-        ).pack(side="bottom", pady=6)
+        ).pack(side="bottom", pady=4)
+
+
 
     # ================= ACTIONS =================
     def open_aula_form(self, day):
-        AulaForm(self.window, day, self.month, self.year)
+        form = AulaForm(self.window, day, self.month, self.year)
+        self.window.wait_window(form.window)
+        self.refresh()
+
 
     def prev_month(self):
         self.month -= 1
@@ -188,6 +222,7 @@ class AgendaView:
 
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
 
     def on_close(self):
         self.parent.deiconify()
