@@ -63,6 +63,7 @@ class Aula:
                 return None
         return None
 
+    #get class from a specific teacher, date and shift
     @staticmethod
     def getByProfessorAgendaTurno(id_professor, id_agenda, id_turno):
         conn = get_connection()
