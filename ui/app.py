@@ -1,5 +1,11 @@
 import tkinter as tk
 from ui.agenda_view import AgendaView
+from ui.professor_form import ProfessorForm
+from ui.turno_form import TurnoForm
+from ui.disciplina_form import DisciplinaForm
+from ui.turma_form import TurmaForm
+from ui.curso_form import CursoForm
+
 
 class MainWindow:
     def __init__(self):
@@ -7,41 +13,70 @@ class MainWindow:
         self.root.title("Sistema de Agenda de Professores")
         self.root.geometry("900x600")
 
-        self.create_menu()
-        self.create_home()
+        self.build_menu()
+
+        tk.Label(
+            self.root,
+            text="Sistema de Agenda",
+            font=("Segoe UI", 18, "bold")
+        ).pack(pady=40)
+
+        tk.Button(
+            self.root,
+            text="Abrir Agenda",
+            font=("Segoe UI", 12),
+            width=20,
+            command=self.open_agenda
+        ).pack(pady=20)
 
         self.root.mainloop()
 
-    def create_menu(self):
-        menu_bar = tk.Menu(self.root)
+    # ================= MENU =================
+    def build_menu(self):
+        menubar = tk.Menu(self.root)
 
-        agenda_menu = tk.Menu(menu_bar, tearoff=0)
-        agenda_menu.add_command(label="Agenda", command=self.open_agenda)
-        agenda_menu.add_separator()
-        agenda_menu.add_command(label="Sair", command=self.root.quit)
-
-        menu_bar.add_cascade(label="Menu", menu=agenda_menu)
-        self.root.config(menu=menu_bar)
-
-    def create_home(self):
-        label = tk.Label(
-            self.root,
-            text="Sistema de Agenda de Professores",
-            font=("Arial", 20)
+        cadastros_menu = tk.Menu(menubar, tearoff=0)
+        cadastros_menu.add_command(
+            label="Professor",
+            command=self.open_professor
         )
-        label.pack(expand=True)
+        cadastros_menu.add_command(
+            label="Turno",
+            command=self.open_turno
+        )
+        cadastros_menu.add_command(
+            label="Disciplina",
+            command=self.open_disciplina
+        )
+        cadastros_menu.add_command(
+            label="Turma",
+            command=self.open_turma
+        )
+        cadastros_menu.add_command(
+            label="Curso",
+            command=self.open_curso
+        )
 
+        menubar.add_cascade(label="Cadastros", menu=cadastros_menu)
+
+        self.root.config(menu=menubar)
+
+    # ================= ACTIONS =================
     def open_agenda(self):
+        self.root.withdraw()
         AgendaView(self.root)
 
-    def open_agenda(self):
-        AgendaView(self.root)
+    def open_professor(self):
+        ProfessorForm(self.root)
 
-    def open_agenda(self):
-        self.root.withdraw()  # esconde a tela principal
-        AgendaView(self.root)
+    def open_turno(self):
+        TurnoForm(self.root)
 
+    def open_disciplina(self):
+        DisciplinaForm(self.root)
 
+    def open_turma(self):
+        TurmaForm(self.root)
 
-if __name__ == "__main__":
-    MainWindow()
+    def open_curso(self):
+        CursoForm(self.root)
