@@ -93,7 +93,7 @@ Represents student groups or classes.
 ### Agenda
 
 * `id` (PK)
-* `dia`
+* `data`
 * `id_turno` (FK → Turno)
 * `id_professor` (FK → Professor)
 
