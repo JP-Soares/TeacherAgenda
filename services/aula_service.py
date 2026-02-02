@@ -21,15 +21,20 @@ class AulaService:
         return len(aulas) > 0
 
     @staticmethod
-    def agendar_aula(id_professor, id_disciplina, id_curso, id_agenda, id_turno, id_turma):
+    def agendar_aula(
+        id_professor,
+        id_disciplina,
+        id_curso,
+        id_agenda,
+        id_turno,
+        id_turma
+    ):
+        #regra de negócio
+        if Aula.existe_conflito(id_turma, id_agenda, id_turno):
+            return False, "Já existe aula para esta turma neste dia e turno."
 
-        if AulaService.professor_tem_conflito(id_professor, id_agenda, id_turno):
-            return False, "Professor já possui aula nesse horário"
-
-        if AulaService.turma_tem_conflito(id_turma, id_agenda, id_turno):
-            return False, "Turma já possui aula nesse horário"
-
-        sucesso = Aula.add(
+        # 🔹 persistência delegada ao model
+        Aula.add(
             id_professor,
             id_disciplina,
             id_curso,
@@ -38,7 +43,4 @@ class AulaService:
             id_turma
         )
 
-        if sucesso:
-            return True, "Aula agendada com sucesso"
-
-        return False, "Erro ao agendar aula"
+        return True, "Aula cadastrada com sucesso!"

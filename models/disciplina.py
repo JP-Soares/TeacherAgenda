@@ -71,3 +71,19 @@ class Disciplina:
         except Exception as e:
                 print("Erro ao buscar disciplina:", e)
                 return None
+
+    @staticmethod
+    def getByProfessor(id_professor):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT d.id, d.nome
+            FROM disciplina d
+            JOIN professor_disciplina pd ON pd.id_disciplina = d.id
+            WHERE pd.id_professor = ?
+        """, (id_professor,))
+
+        dados = cursor.fetchall()
+        conn.close()
+        return dados

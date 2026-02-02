@@ -31,6 +31,23 @@ class Aula:
                 print("Erro ao adicionar aula:", e)
                 return False
         return False
+    
+    @staticmethod
+    def existe_conflito(id_turma, id_agenda, id_turno):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 1
+            FROM aula
+            WHERE id_turma = ?
+              AND id_agenda = ?
+              AND id_turno = ?
+        """, (id_turma, id_agenda, id_turno))
+
+        existe = cursor.fetchone() is not None
+        conn.close()
+        return existe
 
     @staticmethod
     def update(id, id_professor, id_disciplina, id_curso, id_agenda, id_turno, id_turma):
@@ -123,6 +140,21 @@ class Aula:
         except Exception as e:
             print("Erro ao buscar aulas:", e)
             return []
+        
+    @staticmethod
+    def getByTurmaAgendaTurno(id_turma, id_agenda, id_turno):
+        conn = get_connection()
+        cursor = conn.cursor()
 
+        cursor.execute("""
+            SELECT a.id
+            FROM aula a
+            WHERE a.id_turma = ?
+              AND a.id_agenda = ?
+              AND a.id_turno = ?
+        """, (id_turma, id_agenda, id_turno))
 
+        aula = cursor.fetchone()
+        conn.close()
 
+        return aula

@@ -38,20 +38,26 @@ class AulaForm:
         # ===== Professor =====
         self.professores = Professor.getAll()
         self.prof_var = tk.StringVar()
-        self.create_combo(frame, "Professor", self.prof_var,
-                          self.professores)
+        self.prof_combo = self.create_combo(
+            frame, "Professor", self.prof_var, self.professores
+        )
+
+        self.prof_combo.bind("<<ComboboxSelected>>", self.on_professor_change)
+
 
         # ===== Disciplina =====
         self.disciplinas = Disciplina.getAll()
         self.disc_var = tk.StringVar()
-        self.create_combo(frame, "Disciplina", self.disc_var,
-                          self.disciplinas)
+        self.disc_combo = self.create_combo(
+            frame, "Disciplina", self.disc_var, []
+        )
 
         # ===== Curso =====
         self.cursos = Curso.getAll()
         self.curso_var = tk.StringVar()
-        self.create_combo(frame, "Curso", self.curso_var,
-                          self.cursos)
+        self.curso_combo = self.create_combo(
+            frame, "Curso", self.curso_var, []
+        )
 
         # ===== Turma =====
         self.turmas = Turma.getAll()
@@ -92,6 +98,9 @@ class AulaForm:
 
         if valores:
             combo.current(0)
+
+        return combo
+
 
     # ================= SAVE =================
     def salvar(self):
@@ -135,3 +144,29 @@ class AulaForm:
             if item[1] == nome:
                 return item[0]
         return None
+    
+    def on_professor_change(self, event):
+        id_professor = self.get_id(
+            self.prof_var.get(),
+            self.professores
+        )
+
+        # 🔹 Disciplinas do professor
+        self.disciplinas = Disciplina.getByProfessor(id_professor)
+        self.update_combo(self.disc_combo, self.disc_var, self.disciplinas)
+
+        # 🔹 Cursos relacionados às disciplinas
+        ids_disc = [d[0] for d in self.disciplinas]
+        self.cursos = Curso.getByDisciplinas(ids_disc)
+        self.update_combo(self.curso_combo, self.curso_var, self.cursos)
+
+    def update_combo(self, combo, var, data):
+        valores = [item[1] for item in data]
+        combo["values"] = valores
+
+        if valores:
+            var.set(valores[0])
+        else:
+            var.set("")
+
+

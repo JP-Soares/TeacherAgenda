@@ -71,3 +71,24 @@ class Curso:
         except Exception as e:
                 print("Erro ao buscar curso:", e)
                 return None
+
+    @staticmethod
+    def getByDisciplinas(ids_disciplinas):
+        if not ids_disciplinas:
+            return []
+
+        placeholders = ",".join("?" * len(ids_disciplinas))
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(f"""
+            SELECT DISTINCT c.id, c.nome
+            FROM curso c
+            JOIN curso_disciplina cd ON cd.id_curso = c.id
+            WHERE cd.id_disciplina IN ({placeholders})
+        """, ids_disciplinas)
+
+        dados = cursor.fetchall()
+        conn.close()
+        return dados
