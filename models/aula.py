@@ -116,12 +116,13 @@ class Aula:
                 ORDER BY tu.nome
             """, (data,))
 
-            resultado = cursor.fetchall()
+            aulas = cursor.fetchall()
             conn.close()
-            return resultado
+            return aulas
 
         except Exception as e:
             print("Erro ao buscar aulas:", e)
             return []
+
 
 

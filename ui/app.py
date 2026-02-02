@@ -5,6 +5,7 @@ from ui.turno_form import TurnoForm
 from ui.disciplina_form import DisciplinaForm
 from ui.turma_form import TurmaForm
 from ui.curso_form import CursoForm
+from ui.lista_view import ListaView
 
 
 class MainWindow:
@@ -35,31 +36,32 @@ class MainWindow:
     def build_menu(self):
         menubar = tk.Menu(self.root)
 
-        cadastros_menu = tk.Menu(menubar, tearoff=0)
-        cadastros_menu.add_command(
-            label="Professor",
-            command=self.open_professor
+        menu_cadastros = tk.Menu(menubar, tearoff=0)
+        menu_cadastros.add_command(
+            label="Professores",
+            command=lambda: self.open_lista("professor")
         )
-        cadastros_menu.add_command(
-            label="Turno",
-            command=self.open_turno
+        menu_cadastros.add_command(
+            label="Cursos",
+            command=lambda: self.open_lista("curso")
         )
-        cadastros_menu.add_command(
-            label="Disciplina",
-            command=self.open_disciplina
+        menu_cadastros.add_command(
+            label="Disciplinas",
+            command=lambda: self.open_lista("disciplina")
         )
-        cadastros_menu.add_command(
-            label="Turma",
-            command=self.open_turma
+        menu_cadastros.add_command(
+            label="Turmas",
+            command=lambda: self.open_lista("turma")
         )
-        cadastros_menu.add_command(
-            label="Curso",
-            command=self.open_curso
+        menu_cadastros.add_command(
+            label="Turnos",
+            command=lambda: self.open_lista("turno")
         )
 
-        menubar.add_cascade(label="Cadastros", menu=cadastros_menu)
+        menubar.add_cascade(label="Cadastros", menu=menu_cadastros)
 
         self.root.config(menu=menubar)
+
 
     # ================= ACTIONS =================
     def open_agenda(self):
@@ -80,3 +82,7 @@ class MainWindow:
 
     def open_curso(self):
         CursoForm(self.root)
+        
+    def open_lista(self, tipo):
+        ListaView(self.root, tipo)
+

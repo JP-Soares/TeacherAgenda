@@ -74,27 +74,27 @@ class Agenda:
                 return None
         
     @staticmethod
-    def getByDia(dia, mes, ano):
+    def get_or_create(data, id_turno, id_professor):
         conn = get_connection()
         cursor = conn.cursor()
 
         cursor.execute("""
             SELECT id FROM agenda
-            WHERE dia = ? AND mes = ? AND ano = ?
-        """, (dia, mes, ano))
+            WHERE data = ? AND id_turno = ? AND id_professor = ?
+        """, (data, id_turno, id_professor))
 
-        agenda = cursor.fetchone()
+        result = cursor.fetchone()
 
-        # Se não existir, cria
-        if not agenda:
-            cursor.execute("""
-                INSERT INTO agenda (dia, mes, ano)
-                VALUES (?, ?, ?)
-            """, (dia, mes, ano))
-            conn.commit()
-            agenda_id = cursor.lastrowid
-        else:
-            agenda_id = agenda[0]
+        if result:
+            conn.close()
+            return result[0]
 
+        cursor.execute("""
+            INSERT INTO agenda (data, id_turno, id_professor)
+            VALUES (?, ?, ?)
+        """, (data, id_turno, id_professor))
+
+        conn.commit()
+        agenda_id = cursor.lastrowid
         conn.close()
         return agenda_id

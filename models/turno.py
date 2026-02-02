@@ -1,25 +1,24 @@
 from database.db import get_connection
 
 class Turno:
-    def __init__(self, id, nome, carga_horaria):
+    def __init__(self, id, nome):
         self.id = id
         self.nome = nome
-        self.carga_horaria = carga_horaria
 
     @staticmethod
-    def validate(nome, carga_horaria):
-        if nome != '' and carga_horaria != '':
+    def validate(nome):
+        if nome != '':
             return True
         return False
 
     @staticmethod
-    def add(nome, carga_horaria):
-        if Turno.validate(nome, carga_horaria):
+    def add(nome):
+        if Turno.validate(nome):
             try:
                 conn = get_connection()
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO turno (nome, carga_horaria) VALUES (?, ?)",
-                               (nome, carga_horaria))
+                cursor.execute("INSERT INTO turno (nome) VALUES (?)",
+                               (nome))
                 conn.commit()
                 conn.close()
                 return True
@@ -29,13 +28,13 @@ class Turno:
         return False
 
     @staticmethod
-    def update(id, nome, carga_horaria):
-        if Turno.validate(nome, carga_horaria):
+    def update(id, nome):
+        if Turno.validate(nome):
             try:
                 conn = get_connection()
                 cursor = conn.cursor()
                 cursor.execute("UPDATE turno SET nome=? WHERE id=?",
-                               (nome, carga_horaria, id))
+                               (nome, id))
                 conn.commit()
                 conn.close()
                 return True

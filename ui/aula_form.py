@@ -102,8 +102,15 @@ class AulaForm:
             id_turma = self.get_id(self.turma_var.get(), self.turmas)
             id_turno = self.get_id(self.turno_var.get(), self.turnos)
 
-            # 👉 busca ou cria agenda pelo dia
-            id_agenda = Agenda.getByDia(self.day, self.month, self.year)
+            # 🔹 DATA NO PADRÃO DO BANCO
+            data = f"{self.year:04d}-{self.month:02d}-{self.day:02d}"
+
+            # 🔹 BUSCA OU CRIA AGENDA
+            id_agenda = Agenda.get_or_create(
+                data,
+                id_turno,
+                id_professor
+            )
 
             sucesso, msg = AulaService.agendar_aula(
                 id_professor,
