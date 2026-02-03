@@ -1,8 +1,11 @@
 import tkinter as tk
 import calendar
 from datetime import datetime
+from tkinter import messagebox
+
 from ui.aula_form import AulaForm
 from models.aula import Aula
+from services.aula_service import AulaService
 
 
 class AgendaView:
@@ -52,7 +55,7 @@ class AgendaView:
             width=3
         ).pack(side="left")
 
-    # ================= CALENDAR + SCROLL =================
+    # ================= CALENDAR =================
     def build_calendar(self):
         self.calendar_container = tk.Frame(self.window, bg="#f4f6f8")
         self.calendar_container.pack(fill="both", expand=True, padx=10, pady=10)
@@ -74,7 +77,6 @@ class AgendaView:
         self.canvas.configure(yscrollcommand=scrollbar.set)
 
         self.calendar_frame = tk.Frame(self.canvas, bg="#f4f6f8")
-        self.calendar_frame.pack_propagate(False)
 
         self.calendar_window = self.canvas.create_window(
             (0, 0),
@@ -97,10 +99,9 @@ class AgendaView:
             )
         )
 
-        self.draw_calendar()
         self.canvas.bind_all("<MouseWheel>", self.on_mousewheel)
 
-
+        self.draw_calendar()
 
     def draw_calendar(self):
         days = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
@@ -121,7 +122,7 @@ class AgendaView:
         for i in range(7):
             self.calendar_frame.columnconfigure(i, weight=1, uniform="cal")
 
-        total_rows = len(calendar.monthcalendar(self.year, self.month)) + 1
+        total_rows = len(month_days) + 1
         for i in range(total_rows):
             self.calendar_frame.rowconfigure(i, weight=1, uniform="row")
 
@@ -135,12 +136,12 @@ class AgendaView:
         )
         card.grid(row=row, column=col, padx=6, pady=6, sticky="nsew")
         card.grid_propagate(False)
-        card.configure(width=140, height=140)
+        card.configure(width=200, height=160)
 
         if day == 0:
             return
 
-        # 🔹 Número do dia
+        # Número do dia
         tk.Label(
             card,
             text=str(day),
@@ -148,17 +149,16 @@ class AgendaView:
             bg="#ffffff"
         ).pack(anchor="nw", padx=6, pady=2)
 
-        # 🔹 Busca aulas do banco
         aulas = Aula.getByData(day, self.month, self.year)
 
-        # 🔹 Agrupa por turno
+        #AGRUPA POR TURNO
         aulas_por_turno = {}
-        for _, disciplina, turma, turno, professor in aulas:
+        for id_aula, disciplina, turma, turno, professor in aulas:
             aulas_por_turno.setdefault(turno, []).append(
-                (disciplina, professor)
+                (id_aula, disciplina, professor)
             )
 
-        # 🔹 Renderiza turnos
+        #RENDERIZA POR TURNO
         for turno, aulas_turno in aulas_por_turno.items():
             tk.Label(
                 card,
@@ -166,23 +166,37 @@ class AgendaView:
                 font=("Segoe UI", 9, "bold"),
                 fg="#333333",
                 bg="#ffffff"
-            ).pack(anchor="w", padx=6)
+            ).pack(anchor="w", padx=6, pady=(4, 0))
 
-            for disciplina, professor in aulas_turno:
+            for id_aula, disciplina, professor in aulas_turno:
+                linha = tk.Frame(card, bg="#ffffff")
+                linha.pack(fill="x", padx=6, pady=1)
+
                 tk.Label(
-                    card,
+                    linha,
                     text=f"• {disciplina} ({professor})",
                     font=("Segoe UI", 8),
                     fg="#1565c0",
                     bg="#ffffff",
-                    wraplength=130,
+                    wraplength=120,
                     justify="left"
-                ).pack(anchor="w", padx=10)
+                ).pack(side="left", fill="x", expand=True)
 
-        # 🔹 Botão editar
+                tk.Button(
+                    linha,
+                    text="🗑",
+                    bg="#e53935",
+                    fg="white",
+                    font=("Segoe UI", 8, "bold"),
+                    relief="flat",
+                    width=2,
+                    command=lambda i=id_aula: self.confirmar_delete(i)
+                ).pack(side="right")
+
+        # Botão adicionar
         tk.Button(
             card,
-            text="Editar",
+            text="Adicionar",
             font=("Segoe UI", 9),
             bg="#1976d2",
             fg="white",
@@ -191,13 +205,22 @@ class AgendaView:
         ).pack(side="bottom", pady=4)
 
 
-
     # ================= ACTIONS =================
     def open_aula_form(self, day):
         form = AulaForm(self.window, day, self.month, self.year)
         self.window.wait_window(form.window)
         self.refresh()
 
+    def confirmar_delete(self, id_aula):
+        if messagebox.askyesno(
+            "Confirmar exclusão",
+            "Deseja realmente excluir esta aula?"
+        ):
+            sucesso, msg = AulaService.excluir_aula(id_aula)
+            if sucesso:
+                self.refresh()
+            else:
+                messagebox.showerror("Erro", msg)
 
     def prev_month(self):
         self.month -= 1
@@ -219,10 +242,8 @@ class AgendaView:
         self.build_header()
         self.build_calendar()
 
-
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-
 
     def on_close(self):
         self.parent.deiconify()

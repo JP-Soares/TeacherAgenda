@@ -59,7 +59,9 @@ def create_tables():
     "id integer primary key autoincrement," \
     "nome text not null," \
     "empresa text not null," \
-    "localidade text not null);")
+    "localidade text not null," \
+    "id_curso integer not null, " \
+    "foreign key(id_curso) references curso(id));")
 
     #create table aula
     cursor.execute("create table if not exists aula(" \
@@ -76,6 +78,16 @@ def create_tables():
     "foreign key(id_agenda) references agenda(id)," \
     "foreign key(id_turno) references turno(id)," \
     "foreign key(id_turma) references turma(id));")
+
+    #create table professor_indisponibilidade
+    cursor.execute("create table professor_indisponibilidade(" \
+    "id integer primary key autoincrement," \
+    "id_professor integer not null," \
+    "data text not null," \
+    "id_turno integer not null," \
+    "motivo text," \
+    "foreign key(id_professor) references professor(id)," \
+    "foreign key(id_turno) references turno(id));")
 
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     print(cursor.fetchall())

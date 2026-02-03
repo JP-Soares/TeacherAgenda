@@ -83,17 +83,26 @@ class Aula:
     #get class from a specific teacher, date and shift
     @staticmethod
     def getByProfessorAgendaTurno(id_professor, id_agenda, id_turno):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT * FROM aula
-            WHERE id_professor = ?
-            AND id_agenda = ?
-            AND id_turno = ?
-        """, (id_professor, id_agenda, id_turno))
-        result = cursor.fetchall()
-        conn.close()
-        return result
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT *
+                FROM aula
+                WHERE id_professor = ?
+                AND id_agenda = ?
+                AND id_turno = ?
+            """, (id_professor, id_agenda, id_turno))
+
+            resultado = cursor.fetchall()
+            conn.close()
+
+            return resultado or []  # 👈 SEMPRE lista
+
+        except Exception as e:
+            print("Erro ao buscar aulas do professor:", e)
+            return []
     
     @staticmethod
     def getAll():
@@ -143,18 +152,43 @@ class Aula:
         
     @staticmethod
     def getByTurmaAgendaTurno(id_turma, id_agenda, id_turno):
-        conn = get_connection()
-        cursor = conn.cursor()
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT a.id
-            FROM aula a
-            WHERE a.id_turma = ?
-              AND a.id_agenda = ?
-              AND a.id_turno = ?
-        """, (id_turma, id_agenda, id_turno))
+            cursor.execute("""
+                SELECT *
+                FROM aula
+                WHERE id_turma = ?
+                  AND id_agenda = ?
+                  AND id_turno = ?
+            """, (id_turma, id_agenda, id_turno))
 
-        aula = cursor.fetchone()
-        conn.close()
+            resultado = cursor.fetchall()
+            conn.close()
 
-        return aula
+            #SEMPRE retorna lista
+            return resultado or []
+
+        except Exception as e:
+            print("Erro ao buscar aulas da turma:", e)
+            return []
+        
+    @staticmethod
+    def delete(id_aula):
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "DELETE FROM aula WHERE id = ?",
+                (id_aula,)
+            )
+
+            conn.commit()
+            conn.close()
+            return True
+
+        except Exception as e:
+            print("Erro ao deletar aula:", e)
+            return False
