@@ -71,9 +71,16 @@ class ListaView:
 
         tk.Button(
             btn_frame,
+            text="Alterar",
+            command=self.alterar
+        ).pack(side="left", padx=5)
+
+        tk.Button(
+            btn_frame,
             text="Excluir",
             command=self.excluir
         ).pack(side="left", padx=5)
+
 
     def load_data(self):
         self.tree.delete(*self.tree.get_children())
@@ -106,3 +113,25 @@ class ListaView:
         if messagebox.askyesno("Confirmar", "Deseja excluir?"):
             self.model.delete(id_item)
             self.load_data()
+
+    def alterar(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning(
+                "atenção",
+                "selecione um item para alterar"
+            )
+            return
+
+        values = self.tree.item(selected[0], "values")
+        id_item = values[0]
+
+        form_class = FORMS.get(self.tipo)
+        if not form_class:
+            return
+
+        form = form_class(self.window, id_item)
+        self.window.wait_window(form.window)
+
+        self.load_data()
+
