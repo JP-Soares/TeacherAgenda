@@ -13,10 +13,16 @@ from models.aula import Aula
 
 class AgendaView:
     def __init__(self, parent):
+
         self.parent = parent
+
         self.window = tk.Toplevel(parent)
+        self.window.transient(parent)
+        self.window.grab_set()
+        self.window.focus_force()
+
         self.window.title("agenda do professor")
-        self.window.geometry("1000x750")
+        self.window.geometry("1280x750")
         self.window.configure(bg="#f4f6f8")
 
         self.window.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -269,14 +275,12 @@ class AgendaView:
             command=lambda d=data: self.open_indisponibilidade_form(popup, d)
         ).pack(pady=5)
 
-    def open_aula_form(self, popup, day):
+    def open_aula_form(self, popup, data):
         popup.destroy()
 
         form = AulaForm(
             self.window,
-            day,
-            self.month,
-            self.year
+            data
         )
         self.window.wait_window(form.window)
         self.refresh()

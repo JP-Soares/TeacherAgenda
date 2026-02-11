@@ -8,9 +8,16 @@ from services.indisponibilidade_service import IndisponibilidadeService
 
 class DisponibilidadeForm:
     def __init__(self, parent, data):
+        
         self.window = tk.Toplevel(parent)
-        self.window.title("Indisponibilidade do Professor")
-        self.window.geometry("420x420")
+        self.window.title("Professor")
+
+        self.window.transient(parent)
+        self.window.grab_set()
+        self.window.focus_force()
+        
+        self.window.title("indisponibilidade")
+        self.window.geometry("450x500")
         self.window.configure(bg="#f4f6f8")
         self.window.resizable(False, False)
 

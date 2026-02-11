@@ -1,4 +1,5 @@
 from database.db import get_connection
+from models.base_model import BaseModel
 
 class Disciplina:
     def __init__(self, id, nome, carga_horaria):
@@ -50,7 +51,10 @@ class Disciplina:
             try:
                 conn = get_connection()
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM disciplina WHERE id = ?", (id,))
+                cursor.execute(
+                    "select id, nome, carga_horaria from disciplina where id = ?",
+                    (id)
+                )
                 resultado = cursor.fetchone()
                 conn.close()
                 return resultado
@@ -87,3 +91,21 @@ class Disciplina:
         dados = cursor.fetchall()
         conn.close()
         return dados
+    
+    @staticmethod
+    def delete(id_disciplina):
+        queries = [
+            "DELETE FROM aula WHERE id_disciplina = ?",
+            "DELETE FROM professor_disciplina WHERE id_disciplina = ?",
+            "DELETE FROM curso_disciplina WHERE id_disciplina = ?",
+            "DELETE FROM disciplina WHERE id = ?"
+        ]
+
+        params = [
+            (id_disciplina,),
+            (id_disciplina,),
+            (id_disciplina,),
+            (id_disciplina,)
+        ]
+
+        BaseModel.execute_delete(queries, params)

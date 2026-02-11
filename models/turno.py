@@ -1,4 +1,5 @@
 from database.db import get_connection
+from models.base_model import BaseModel
 
 class Turno:
     def __init__(self, id, nome):
@@ -18,7 +19,7 @@ class Turno:
                 conn = get_connection()
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO turno (nome) VALUES (?)",
-                               (nome))
+                               (nome,))
                 conn.commit()
                 conn.close()
                 return True
@@ -70,3 +71,19 @@ class Turno:
         except Exception as e:
                 print("Erro ao buscar turno:", e)
                 return None
+        
+    @staticmethod
+    def delete(id_turno):
+        queries = [
+            "DELETE FROM aula WHERE id_turno = ?",
+            "DELETE FROM professor_indisponibilidade WHERE id_turno = ?",
+            "DELETE FROM turno WHERE id = ?"
+        ]
+
+        params = [
+            (id_turno,),
+            (id_turno,),
+            (id_turno,)
+        ]
+
+        BaseModel.execute_delete(queries, params)

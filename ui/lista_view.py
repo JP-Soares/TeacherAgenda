@@ -30,6 +30,15 @@ FORMS = {
     "turno": TurnoForm
 }
 
+IMPACTO_EXCLUSAO = {
+    "turno": "• Todas as aulas vinculadas a este turno\n• Indisponibilidades de professores",
+    "professor": "• Todas as aulas do professor\n• Vínculos com disciplinas\n• Indisponibilidades cadastradas",
+    "disciplina": "• Vínculos com professores\n• Vínculos com cursos\n• Todas as aulas relacionadas",
+    "curso": "• Turmas vinculadas\n• Disciplinas do curso\n• Todas as aulas",
+    "turma": "• Todas as aulas dessa turma"
+}
+
+
 
 
 class ListaView:
@@ -38,6 +47,12 @@ class ListaView:
         self.model, self.columns = MODELS[tipo]
 
         self.window = tk.Toplevel(parent)
+        self.window.title("Professor")
+
+        self.window.transient(parent)
+        self.window.grab_set()
+        self.window.focus_force()
+        
         self.window.title(f"Lista de {tipo.capitalize()}")
         self.window.geometry("600x400")
 
@@ -105,14 +120,42 @@ class ListaView:
     def excluir(self):
         selected = self.tree.selection()
         if not selected:
+            messagebox.showwarning(
+                "Atenção",
+                "Selecione um item para excluir."
+            )
             return
 
         values = self.tree.item(selected[0], "values")
         id_item = values[0]
+        nome_item = values[1]
 
-        if messagebox.askyesno("Confirmar", "Deseja excluir?"):
-            self.model.delete(id_item)
-            self.load_data()
+        impacto = IMPACTO_EXCLUSAO.get(self.tipo, "Dados vinculados serão removidos.")
+
+        confirmar = messagebox.askyesno(
+            "⚠️ ATENÇÃO — EXCLUSÃO DEFINITIVA",
+            f"Você está prestes a excluir:\n\n"
+            f"➡ {self.tipo.upper()}: {nome_item}\n\n"
+            f"📌 CONSEQUÊNCIAS:\n"
+            f"{impacto}\n\n"
+            f"❌ Essa ação NÃO poderá ser desfeita.\n\n"
+            f"Deseja continuar?"
+        )
+
+        if confirmar:
+            try:
+                self.model.delete(id_item)
+                self.load_data()
+                messagebox.showinfo(
+                    "Sucesso",
+                    f"{self.tipo.capitalize()} excluído com sucesso."
+                )
+            except Exception as e:
+                messagebox.showerror(
+                    "Erro",
+                    f"Não foi possível excluir.\n\n{str(e)}"
+                )
+
 
     def alterar(self):
         selected = self.tree.selection()
@@ -135,3 +178,12 @@ class ListaView:
 
         self.load_data()
 
+    def confirmar_exclusao(entidade, impacto):
+        return messagebox.askyesno(
+            "⚠️ ATENÇÃO — EXCLUSÃO DEFINITIVA",
+            f"Você está prestes a excluir {entidade}.\n\n"
+            f"CONSEQUÊNCIAS:\n"
+            f"{impacto}\n\n"
+            f"❌ Essa ação NÃO poderá ser desfeita.\n\n"
+            f"Deseja continuar?"
+        )

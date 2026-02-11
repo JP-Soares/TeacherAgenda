@@ -93,3 +93,29 @@ class Indisponibilidade:
         result = cursor.fetchall()
         conn.close()
         return result
+    
+    @staticmethod
+    def deleteByProfessor(id_professor):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM professor_indisponibilidade WHERE id_professor = ?",
+            (id_professor,)
+        )
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+        return linhas
+
+    @staticmethod
+    def deleteByTurno(id_turno):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM professor_indisponibilidade WHERE id_turno = ?",
+            (id_turno,)
+        )
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+        return linhas

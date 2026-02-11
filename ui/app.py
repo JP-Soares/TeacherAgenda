@@ -13,6 +13,7 @@ class MainWindow:
         self.root = tk.Tk()
         self.root.title("Sistema de Agenda de Professores")
         self.root.geometry("900x600")
+        self.root.state("zoomed")
 
         self.build_menu()
 
@@ -65,7 +66,6 @@ class MainWindow:
 
     # ================= ACTIONS =================
     def open_agenda(self):
-        self.root.withdraw()
         AgendaView(self.root)
 
     def open_professor(self):

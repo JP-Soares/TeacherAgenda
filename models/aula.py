@@ -4,41 +4,35 @@ from database.db import get_connection
 class Aula:
 
     @staticmethod
-    def add(
-        data,
-        id_professor,
-        id_disciplina,
-        id_curso,
-        id_turno,
-        id_turma
-    ):
+    def add(data, id_professor, id_disciplina, id_curso, id_turno, id_turma):
         conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            insert into aula (
-                data,
-                id_professor,
-                id_disciplina,
-                id_curso,
-                id_turno,
-                id_turma
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                insert into aula (
+                    data,
+                    id_professor,
+                    id_disciplina,
+                    id_curso,
+                    id_turno,
+                    id_turma
+                )
+                values (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    data,
+                    id_professor,
+                    id_disciplina,
+                    id_curso,
+                    id_turno,
+                    id_turma
+                )
             )
-            values (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                data,
-                id_professor,
-                id_disciplina,
-                id_curso,
-                id_turno,
-                id_turma
-            )
-        )
+            conn.commit()
+        finally:
+            conn.close()
 
-        conn.commit()
-        conn.close()
 
     @staticmethod
     def delete(id_aula):
@@ -137,3 +131,83 @@ class Aula:
         result = cursor.fetchall()
         conn.close()
         return result
+    
+    @staticmethod
+    def deleteByProfessor(id_professor):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "delete from aula where id_professor = ?",
+            (id_professor,)
+        )
+
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+
+        return linhas > 0
+    
+    @staticmethod
+    def deleteByDisciplina(id_disciplina):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "delete from aula where id_disciplina = ?",
+            (id_disciplina,)
+        )
+
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+
+        return linhas > 0
+    
+    @staticmethod
+    def deleteByCurso(id_curso):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "delete from aula where id_curso = ?",
+            (id_curso,)
+        )
+
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+
+        return linhas > 0
+    
+    @staticmethod
+    def deleteByTurno(id_turno):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "delete from aula where id_turno = ?",
+            (id_turno,)
+        )
+
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+
+        return linhas > 0
+    
+    @staticmethod
+    def deleteByTurma(id_turma):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "delete from aula where id_turma = ?",
+            (id_turma,)
+        )
+
+        conn.commit()
+        linhas = cursor.rowcount
+        conn.close()
+
+        return linhas > 0

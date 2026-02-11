@@ -1,26 +1,28 @@
 from database.db import get_connection
+from models.base_model import BaseModel
 
 class Turma:
-    def __init__(self, id, nome, empresa, localidade):
+    def __init__(self, id, nome, empresa, localidade, id_curso):
         self.id = id
         self.nome = nome
         self.empresa = empresa,
         self.localidade = localidade
+        self.id_curso = id_curso
 
     @staticmethod
-    def validate(nome, empresa, localidade):
-        if nome != '' and empresa != '' and localidade != '':
+    def validate(nome, empresa, localidade, id_curso):
+        if nome != '' and empresa != '' and localidade != '' and id_curso != '':
             return True
         return False
 
     @staticmethod
-    def add(nome, empresa, localidade):
-        if Turma.validate(nome, empresa, localidade):
+    def add(nome, empresa, localidade, id_curso):
+        if Turma.validate(nome, empresa, localidade, id_curso):
             try:
                 conn = get_connection()
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO turma (nome, empresa, localidade) VALUES (?, ?, ?)",
-                               (nome, empresa, localidade))
+                cursor.execute("INSERT INTO turma (nome, empresa, localidade, id_curso) VALUES (?, ?, ?, ?)",
+                               (nome, empresa, localidade, id_curso))
                 conn.commit()
                 conn.close()
                 return True
@@ -30,13 +32,13 @@ class Turma:
         return False
 
     @staticmethod
-    def update(id, nome, empresa, localidade):
-        if Turma.validate(nome, empresa, localidade):
+    def update(id, nome, empresa, localidade, id_curso):
+        if Turma.validate(nome, empresa, localidade, id_curso):
             try:
                 conn = get_connection()
                 cursor = conn.cursor()
-                cursor.execute("UPDATE turma SET nome=?, empresa=?, localidade=? WHERE id=?",
-                               (nome, empresa, localidade, id))
+                cursor.execute("UPDATE turma SET nome=?, empresa=?, localidade=?, id_curso=? WHERE id=?",
+                               (nome, empresa, localidade, id_curso, id))
                 conn.commit()
                 conn.close()
                 return True
@@ -72,3 +74,36 @@ class Turma:
         except Exception as e:
                 print("Erro ao buscar turma:", e)
                 return None
+        
+    @staticmethod
+    def getByCurso(id_curso):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT id, nome
+            FROM turma
+            WHERE id_curso = ?
+            ORDER BY nome
+            """,
+            (id_curso,)
+        )
+
+        dados = cursor.fetchall()
+        conn.close()
+        return dados
+    
+    @staticmethod
+    def delete(id_turma):
+        queries = [
+            "DELETE FROM aula WHERE id_turma = ?",
+            "DELETE FROM turma WHERE id = ?"
+        ]
+
+        params = [
+            (id_turma,),
+            (id_turma,)
+        ]
+
+        BaseModel.execute_delete(queries, params)
