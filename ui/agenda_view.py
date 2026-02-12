@@ -3,6 +3,7 @@ import calendar
 from datetime import datetime
 from tkinter import messagebox
 
+from ui.relatorio_agenda_form import RelatorioAgendaForm
 from ui.aula_form import AulaForm
 from ui.disponibilidade_form import DisponibilidadeForm
 
@@ -32,6 +33,15 @@ class AgendaView:
 
         self.build_header()
         self.build_calendar()
+        tk.Button(
+            self.window,
+            text="Emitir Relatório 📄",
+            bg="#1976D2",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            command=self.abrir_relatorio
+        ).pack(pady=10)
+
 
     # ================= header =================
 
@@ -192,7 +202,7 @@ class AgendaView:
 
             tk.Label(
                 linha,
-                text=f"{turno} • {disciplina}",
+                text=f"{turno} • {disciplina} • {turma} • {professor}",
                 font=("segoe ui", 8),
                 wraplength=120,
                 justify="left",
@@ -335,3 +345,7 @@ class AgendaView:
     def on_close(self):
         self.parent.deiconify()
         self.window.destroy()
+
+    def abrir_relatorio(self):
+        RelatorioAgendaForm(self.window)
+
